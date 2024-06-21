@@ -1,0 +1,54 @@
+name: Github Actions Standard Runner
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        required: true
+        description: LT Username
+      accessKey:
+        required: true
+        description: LT Access Key
+      build:
+        required: true
+        description: LT Access Build
+      sampleRepoLink:
+        required: true
+        default: https://github.com/ritamganguli/playwright_mobile_shopping.git
+        description: Link to the HyperExecute sample repo
+
+jobs:
+  HyperExecute-Selenium:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        test: ["single.js"]  # Include the test names in the matrix
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Running Test
+        id: testng
+        shell: bash
+        run: |
+          echo "STEP 1 ) Downloading sample suite"
+          git clone ${{ github.event.inputs.sampleRepoLink }}
+          echo "STEP 2) Download CLI and setting environment variables"
+          cd playwright_demo_mobile
+          export LT_USERNAME=${{ github.event.inputs.username }}
+          export LT_ACCESS_KEY=${{ github.event.inputs.accessKey }}
+          export LT_BUILD_NAME=${{ github.event.inputs.build }}
+          npm i 
+          npm install axios
+          echo $LT_BUILD_NAME
+          echo $LT_USERNAME
+          echo $LT_ACCESS_KEY
+          node playwright-${{ matrix.test }}
