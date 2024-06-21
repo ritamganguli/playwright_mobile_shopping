@@ -39,7 +39,7 @@ jobs:
         id: run_tests_with_retry
         shell: bash
         run: |
-          MAX_RETRIES=30
+          MAX_RETRIES=2
           RETRY_COUNT=0
           SUCCESS=false
 
@@ -57,8 +57,13 @@ jobs:
             echo $LT_BUILD_NAME
             echo $LT_USERNAME
             echo $LT_ACCESS_KEY
+            
+            set +e  # Disable exit on error
             node playwright-${{ matrix.test }}
-            if [ $? -eq 0 ]; then
+            RESULT=$?
+            set -e  # Re-enable exit on error
+
+            if [ $RESULT -eq 0 ]; then
               SUCCESS=true
               break
             else
